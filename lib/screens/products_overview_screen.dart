@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
-
-import '../widgets/products_grid.dart';
+import 'package:my_shop/providers/cart.dart';
+import 'package:my_shop/screens/cart_screen.dart';
+import 'package:my_shop/widgets/app_drawer.dart';
+import 'package:my_shop/widgets/badge.dart';
+import 'package:my_shop/widgets/products_grid.dart';
+import 'package:provider/provider.dart';
 
 enum FilterOptions {
-  FAVORITE,
-  ALL,
+  favorite,
+  all,
 }
 
 class ProductsOverviewScreen extends StatefulWidget {
@@ -19,13 +23,14 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: const AppDrawer(),
       appBar: AppBar(
         title: const Text("MyShop"),
         actions: [
           PopupMenuButton(
             onSelected: (FilterOptions selectedValue) {
               setState(() {
-                if (selectedValue == FilterOptions.FAVORITE) {
+                if (selectedValue == FilterOptions.favorite) {
                   _showOnlyFavorites = true;
                 } else {
                   _showOnlyFavorites = false;
@@ -34,18 +39,34 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
             },
             itemBuilder: (_) => [
               const PopupMenuItem(
-                value: FilterOptions.FAVORITE,
+                value: FilterOptions.favorite,
                 child: Text("Only Favorite"),
               ),
               const PopupMenuItem(
-                value: FilterOptions.ALL,
+                value: FilterOptions.all,
                 child: Text("Show All"),
               ),
             ],
             icon: const Icon(
               Icons.more_vert,
             ),
-          )
+          ),
+          Flexible(
+            child: Consumer<Cart>(
+              builder: (_, cart, ch) => Badge(
+                value: cart.itemCount.toString(),
+                child: ch!,
+              ),
+              child: IconButton(
+                icon: const Icon(
+                  Icons.shopping_cart,
+                ),
+                onPressed: () {
+                  Navigator.of(context).pushNamed(CartScreen.routeName);
+                },
+              ),
+            ),
+          ),
         ],
       ),
       body: ProductsGrid(
