@@ -4,9 +4,9 @@ import 'package:my_shop/screens/edit_product_screen.dart';
 import 'package:provider/provider.dart';
 
 class UserProductItem extends StatelessWidget {
-  final String id;
-  final String title;
-  final String imageUrl;
+  final String? id;
+  final String? title;
+  final String? imageUrl;
 
   const UserProductItem(
       {required this.id, required this.title, required this.imageUrl, Key? key})
@@ -14,10 +14,11 @@ class UserProductItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scafold = ScaffoldMessenger.of(context);
     return ListTile(
-      title: Text(title),
+      title: Text(title!),
       leading: CircleAvatar(
-        backgroundImage: NetworkImage(imageUrl),
+        backgroundImage: NetworkImage(imageUrl!),
       ),
       trailing: SizedBox(
         width: 100,
@@ -32,31 +33,20 @@ class UserProductItem extends StatelessWidget {
               color: Theme.of(context).primaryColor,
             ),
             IconButton(
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (ctx) => AlertDialog(
-                    elevation: 24.0,
-                    title: const Text('Are you sure?'),
-                    content: const Text('Do you want to remove the item?'),
-                    actions: [
-                      OutlinedButton(
-                        onPressed: () {
-                          Navigator.of(ctx).pop(false);
-                        },
-                        child: const Text('No'),
+              onPressed: () async {
+                try {
+                  await Provider.of<Products>(context, listen: false)
+                      .deleteProduct(id!);
+                } catch (err) {
+                  scafold.showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Deleting failed',
+                        textAlign: TextAlign.center,
                       ),
-                      OutlinedButton(
-                        onPressed: () {
-                          Provider.of<Products>(context, listen: false)
-                              .deleteProduct(id);
-                          Navigator.of(ctx).pop(true);
-                        },
-                        child: const Text('Delete'),
-                      ),
-                    ],
-                  ),
-                );
+                    ),
+                  );
+                }
               },
               icon: const Icon(Icons.delete),
               color: Theme.of(context).errorColor,
